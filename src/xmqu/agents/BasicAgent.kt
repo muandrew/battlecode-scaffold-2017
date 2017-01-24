@@ -2,18 +2,16 @@ package xmqu.agents
 
 import battlecode.common.MapLocation
 import battlecode.common.RobotController
-import xmqu.goals.AtomicGoal
 import xmqu.goals.Goal
-import xmqu.goals.Status
-import xmqu.goals.Telegram
+import xmqu.goals.InitialGoalStub
 
 open class BasicAgent(controller: RobotController) : Agent(controller) {
 
     override fun getInitialGoal(): Goal {
-        return StubGoal(this)
+        return InitialGoal(this)
     }
 
-    class StubGoal(owner: Agent) : AtomicGoal(owner) {
+    class InitialGoal(owner: Agent) : InitialGoalStub(owner) {
         val dest: MapLocation
 
         init {
@@ -26,17 +24,8 @@ open class BasicAgent(controller: RobotController) : Agent(controller) {
             }
         }
 
-        override fun activate() {}
-
-        override fun process(): Status {
-            owner.moveTowards(dest)
-            return Status.ACTIVE
-        }
-
-        override fun terminate() {}
-
-        override fun handleMessage(telegram: Telegram): Boolean {
-            return true
+        override fun onProcess() {
+            agent.moveTowards(dest)
         }
     }
 }

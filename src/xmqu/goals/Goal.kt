@@ -11,19 +11,36 @@ enum class Status {
     FAILED
 }
 
-abstract class Goal(val owner: Agent) {
+abstract class Goal(val agent: Agent) {
 
     var status: Status = Status.INACTIVE
 
-    abstract fun activate()
+    open fun activate() {
+        debug_onActivate()
+        onActivate()
+    }
 
-    abstract fun process(): Status
+    abstract fun onActivate()
 
-    abstract fun terminate()
+    fun process(): Status {
+        activateIfInactive()
+        onProcess()
+        return status
+    }
 
-    abstract fun handleMessage(telegram: Telegram): Boolean
+    abstract fun onProcess()
+
+    fun terminate() {
+        onTerminate()
+    }
+
+    abstract fun onTerminate()
 
     abstract fun addSubGoal(goal: Goal)
+
+    open fun handleMessage(@Suppress("UNUSED_PARAMETER") telegram: Telegram): Boolean {
+        return false
+    }
 
     fun activateIfInactive() {
         if (status != Status.ACTIVE) {
@@ -31,11 +48,33 @@ abstract class Goal(val owner: Agent) {
             activate()
         }
     }
+
+    private fun debug_onActivate() {
+        System.out.println(this.toString())
+    }
 }
 
-abstract class CompositeGoal(owner: Agent) : Goal(owner) {
+abstract class InitialGoalStub(agent: Agent) : Goal(agent) {
+
+    override fun onActivate() {}
+
+    override fun onTerminate() {
+        debug_crash("InitialGoal does not terminate.")
+    }
+
+    override fun addSubGoal(goal: Goal) {
+        debug_crash("InitialGoal does not addSubGoal.")
+    }
+}
+
+abstract class CompositeGoal(agent: Agent) : Goal(agent) {
 
     val subGoals: Stack<Goal> = Stack()
+
+    override fun activate() {
+        clearSubGoals()
+        super.activate()
+    }
 
     fun processSubGoals(): Status {
         while (!subGoals.isEmpty

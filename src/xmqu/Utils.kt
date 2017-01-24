@@ -1,7 +1,9 @@
 package xmqu
 
-import battlecode.common.Direction
+import java.util.*
 
-fun randomDir(): Direction {
-    return Direction((Math.random() * Math.PI * 2).toFloat())
+class Utils {
+    companion object {
+        val random = Random()
+    }
 }

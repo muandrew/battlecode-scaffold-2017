@@ -18,7 +18,8 @@ abstract class Agent(val controller: RobotController) {
         }
     }
 
-    var env = Environment();
+    var env = Environment()
+    val team = controller.team!!
 
     fun run() {
         val goal = getInitialGoal()
@@ -71,7 +72,7 @@ abstract class Agent(val controller: RobotController) {
      * Choose one random direction to try.
      */
     fun moveRandomly(): Boolean {
-        return moveTo(randomDir())
+        return moveTo(Dir.random())
     }
 
     abstract fun getInitialGoal(): Goal
