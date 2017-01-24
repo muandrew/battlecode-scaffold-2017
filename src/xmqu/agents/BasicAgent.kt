@@ -12,31 +12,31 @@ open class BasicAgent(controller: RobotController) : Agent(controller) {
     override fun getInitialGoal(): Goal {
         return StubGoal(this)
     }
-}
 
-class StubGoal(owner: Agent) : AtomicGoal(owner) {
-    val dest: MapLocation
+    class StubGoal(owner: Agent) : AtomicGoal(owner) {
+        val dest: MapLocation
 
-    init {
-        val controller = owner.controller
-        val locations = controller.getInitialArchonLocations(controller.team.opponent())
-        if (locations.isNotEmpty()) {
-            dest = locations[0]
-        } else {
-            dest = controller.location
+        init {
+            val controller = owner.controller
+            val locations = controller.getInitialArchonLocations(controller.team.opponent())
+            if (locations.isNotEmpty()) {
+                dest = locations[0]
+            } else {
+                dest = controller.location
+            }
         }
-    }
 
-    override fun activate() {}
+        override fun activate() {}
 
-    override fun process(): Status {
-        owner.moveTowards(dest)
-        return Status.ACTIVE
-    }
+        override fun process(): Status {
+            owner.moveTowards(dest)
+            return Status.ACTIVE
+        }
 
-    override fun terminate() {}
+        override fun terminate() {}
 
-    override fun handleMessage(telegram: Telegram): Boolean {
-        return true
+        override fun handleMessage(telegram: Telegram): Boolean {
+            return true
+        }
     }
 }

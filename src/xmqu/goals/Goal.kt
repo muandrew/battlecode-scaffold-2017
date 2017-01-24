@@ -78,6 +78,6 @@ abstract class CompositeGoal(owner: Agent) : Goal(owner) {
 abstract class AtomicGoal(owner: Agent) : Goal(owner) {
 
     override fun addSubGoal(goal: Goal) {
-        debug_crash()
+        debug_crash("AtomicGoal can not add sub-Goals.")
     }
 }

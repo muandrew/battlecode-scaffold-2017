@@ -3,8 +3,8 @@ package xmqu
 import battlecode.common.Direction
 import battlecode.common.RobotController
 
-fun debug_crash() {
-    throw Exception("Error!")
+fun debug_crash(message: String) {
+    throw Exception(message)
 }
 
 fun debug_move(controller: RobotController, dir: Direction) {

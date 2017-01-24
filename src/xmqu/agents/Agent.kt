@@ -1,10 +1,8 @@
 package xmqu.agents
 
 import battlecode.common.*
-import xmqu.Vector2D
-import xmqu.debug_move
+import xmqu.*
 import xmqu.goals.Goal
-import xmqu.inverseRSq
 
 abstract class Agent(val controller: RobotController) {
 
@@ -31,6 +29,7 @@ abstract class Agent(val controller: RobotController) {
                 Clock.`yield`()
             } catch (e: Exception) {
                 e.printStackTrace()
+                debug_crash(e.message ?: "no message.")
             }
         }
     }
@@ -76,8 +75,4 @@ abstract class Agent(val controller: RobotController) {
     }
 
     abstract fun getInitialGoal(): Goal
-}
-
-fun randomDir(): Direction {
-    return Direction((Math.random() * Math.PI * 2).toFloat())
 }
