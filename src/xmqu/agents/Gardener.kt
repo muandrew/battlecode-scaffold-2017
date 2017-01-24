@@ -1,10 +1,8 @@
 package xmqu.agents
 
-import battlecode.common.GameConstants
-import battlecode.common.RobotController
-import battlecode.common.RobotType
-import battlecode.common.TreeInfo
+import battlecode.common.*
 import xmqu.Dir
+import xmqu.Utils
 import xmqu.goals.AtomicGoal
 import xmqu.goals.CompositeGoal
 import xmqu.goals.Goal
@@ -43,7 +41,6 @@ class Gardener(controller: RobotController) : Agent(controller), ProductionUnit 
         }
 
         override fun onProcess() {
-            //TODO fix
             status = processSubGoals()
         }
 
@@ -51,45 +48,78 @@ class Gardener(controller: RobotController) : Agent(controller), ProductionUnit 
     }
 
     class FindSettlement(val gardener: Gardener) : AtomicGoal(gardener) {
+        val ROAM_TIME = 10
+        val MAX_STRIDE = 2
+        var roamTime = 0
+        var dir = Direction.NORTH
+        var stridesLeft = MAX_STRIDE
 
-        override fun onActivate() {}
+        override fun onActivate() {
+            roamTime = ROAM_TIME
+        }
 
         override fun onProcess() {
-            if (gardener.canHexUp()) {
-                status = Status.COMPLETE
-            } else {
-                gardener.moveRandomly()
+            if (stridesLeft <= 0) {
+                setNewDirection()
+            }
+            when {
+                roamTime > 0 -> {
+                    randomWalk()
+                    roamTime--
+                }
+                gardener.canHexUp() -> status = Status.COMPLETE
+                else -> gardener.moveRandomly()
             }
         }
 
         override fun onTerminate() {}
+
+        fun randomWalk() {
+            if (gardener.moveTo(dir)) {
+                stridesLeft--
+            } else {
+                setNewDirection()
+            }
+        }
+
+        fun setNewDirection() {
+            dir = Dir.random()
+            stridesLeft = MAX_STRIDE
+        }
     }
 
     class HexFortress(val gardener: Gardener) : CompositeGoal(gardener) {
 
         override fun onActivate() {
-            val gate = Dir.Hex.random()
-            Dir.Hex.values()
-                    .filter { gate != it }
-                    .forEach { addSubGoal(BuildWall(gardener, it)) }
+            val spaces = Dir.Hex.values()
+                    .filter { gardener.controller.canPlantTree(it.dir) }
+
+            if (!spaces.isEmpty()) {
+                val gate = spaces[Utils.random.nextInt(spaces.size)]
+                spaces
+                        .filter { gate != it }
+                        .forEach { addSubGoal(BuildWall(gardener, it)) }
+            }
         }
 
         override fun onProcess() {
-            //TODO fix
             status = processSubGoals()
+            if (status == Status.FAILED) {
+                when (subGoals.head()) {
+                    is HexFortress.BuildWall -> status = Status.ACTIVE
+                }
+            }
         }
 
         override fun onTerminate() {}
 
         class BuildWall(val gardener: Gardener, val hex: Dir.Hex) : AtomicGoal(gardener) {
-            val maxTurn: Int
+            var maxTurn: Int = 0
 
-            init {
+            override fun onActivate() {
                 val controller = gardener.controller
                 maxTurn = controller.roundNum + controller.buildCooldownTurns + 3
             }
-
-            override fun onActivate() {}
 
             override fun onProcess() {
                 val controller = gardener.controller
