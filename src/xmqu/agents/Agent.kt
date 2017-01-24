@@ -42,14 +42,19 @@ abstract class Agent(val controller: RobotController) {
         val location = controller.location
         val heading = Vector2D(location, dest).normalize()
         for (bullet in env.bullets) {
-            heading.addWith(inverseRSq(bullet.location, location, 30F))
+            heading.addWith(inverseRSq(bullet.location, location, 30f))
         }
         for (robot in env.robots) {
-            val mag = if (robot.team.isPlayer) -1F else 20F
+            val mag = if (robot.team.isPlayer) 10f else {
+                when {
+                    robot.type == RobotType.LUMBERJACK -> 55f
+                    else -> 20f
+                }
+            }
             heading.addWith(inverseRSq(robot.location, location, mag))
         }
         for (tree in env.trees) {
-            heading.addWith(inverseRSq(tree.location, location, 5F))
+            heading.addWith(inverseRSq(tree.location, location, 5f))
         }
         val dir = heading.toDirection()
         return moveTo(dir) || moveRandomly() || moveRandomly()
