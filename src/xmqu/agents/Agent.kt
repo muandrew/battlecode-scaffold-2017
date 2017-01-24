@@ -3,10 +3,7 @@ package xmqu.agents
 import battlecode.common.*
 import xmqu.Vector2D
 import xmqu.debug_move
-import xmqu.goals.AtomicGoal
 import xmqu.goals.Goal
-import xmqu.goals.Status
-import xmqu.goals.Telegram
 import xmqu.inverseRSq
 
 abstract class Agent(val controller: RobotController) {
@@ -78,41 +75,7 @@ abstract class Agent(val controller: RobotController) {
         return moveTo(randomDir())
     }
 
-    abstract fun getInitialGoal(): Goal<Agent>
-}
-
-open class BasicAgent(controller: RobotController) : Agent(controller) {
-
-    override fun getInitialGoal(): Goal<Agent> {
-        return StubGoal(this)
-    }
-}
-
-class StubGoal<A : Agent>(owner: A) : AtomicGoal<A>(owner) {
-    val dest: MapLocation
-
-    init {
-        val controller = owner.controller
-        val locations = controller.getInitialArchonLocations(controller.team.opponent())
-        if (locations.isNotEmpty()) {
-            dest = locations[0]
-        } else {
-            dest = controller.location
-        }
-    }
-
-    override fun activate() {}
-
-    override fun process(): Status {
-        owner.moveTowards(dest)
-        return Status.ACTIVE
-    }
-
-    override fun terminate() {}
-
-    override fun handleMessage(telegram: Telegram): Boolean {
-        return true
-    }
+    abstract fun getInitialGoal(): Goal
 }
 
 fun randomDir(): Direction {

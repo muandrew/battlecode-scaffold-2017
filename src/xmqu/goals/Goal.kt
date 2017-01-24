@@ -11,7 +11,7 @@ enum class Status {
     FAILED
 }
 
-abstract class Goal<A : Agent>(val owner: A) {
+abstract class Goal(val owner: Agent) {
 
     var status: Status = Status.INACTIVE
 
@@ -23,7 +23,7 @@ abstract class Goal<A : Agent>(val owner: A) {
 
     abstract fun handleMessage(telegram: Telegram): Boolean
 
-    abstract fun addSubGoal(goal: Goal<A>)
+    abstract fun addSubGoal(goal: Goal)
 
     fun activateIfInactive() {
         if (status != Status.ACTIVE) {
@@ -33,9 +33,9 @@ abstract class Goal<A : Agent>(val owner: A) {
     }
 }
 
-abstract class CompositeGoal<A : Agent>(owner: A) : Goal<A>(owner) {
+abstract class CompositeGoal(owner: Agent) : Goal(owner) {
 
-    val subGoals: Stack<Goal<A>> = Stack()
+    val subGoals: Stack<Goal> = Stack()
 
     fun processSubGoals(): Status {
         while (!subGoals.isEmpty
@@ -70,14 +70,14 @@ abstract class CompositeGoal<A : Agent>(owner: A) : Goal<A>(owner) {
         }
     }
 
-    override fun addSubGoal(goal: Goal<A>) {
+    override fun addSubGoal(goal: Goal) {
         subGoals.push(goal)
     }
 }
 
-abstract class AtomicGoal<A : Agent>(owner: A) : Goal<A>(owner) {
+abstract class AtomicGoal(owner: Agent) : Goal(owner) {
 
-    override fun addSubGoal(goal: Goal<A>) {
+    override fun addSubGoal(goal: Goal) {
         debug_crash()
     }
 }

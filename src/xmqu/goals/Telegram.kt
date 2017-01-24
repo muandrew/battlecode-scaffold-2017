@@ -1,3 +1,3 @@
 package xmqu.goals
 
-interface Telegram {}
+interface Telegram
