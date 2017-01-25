@@ -35,7 +35,6 @@ class Gardener(controller: RobotController) : Agent(controller), ProductionUnit 
     class InitialGoal(val gardener: Gardener) : CompositeGoal(gardener) {
 
         override fun onActivate() {
-            addSubGoal(MaintainFortress(gardener))
             addSubGoal(HexFortress(gardener))
             addSubGoal(FindSettlement(gardener))
         }
@@ -91,6 +90,7 @@ class Gardener(controller: RobotController) : Agent(controller), ProductionUnit 
     class HexFortress(val gardener: Gardener) : CompositeGoal(gardener) {
 
         override fun onActivate() {
+            addSubGoal(MaintainFortress(gardener))
             val spaces = Dir.Hex.values()
                     .filter { gardener.controller.canPlantTree(it.dir) }
 
@@ -107,6 +107,10 @@ class Gardener(controller: RobotController) : Agent(controller), ProductionUnit 
             if (status == Status.FAILED) {
                 when (subGoals.head()) {
                     is HexFortress.BuildWall -> status = Status.ACTIVE
+                    is MaintainFortress -> {
+                        status = Status.INACTIVE
+                        activateIfInactive()
+                    }
                 }
             }
         }
@@ -136,28 +140,39 @@ class Gardener(controller: RobotController) : Agent(controller), ProductionUnit 
 
             override fun onTerminate() {}
         }
-    }
 
-    class MaintainFortress(val gardener: Gardener) : AtomicGoal(gardener) {
+        class MaintainFortress(val gardener: Gardener) : AtomicGoal(gardener) {
 
-        override fun onActivate() {}
+            override fun onActivate() {}
 
-        override fun onProcess() {
-            val trees = gardener.controller.senseNearbyTrees(2f, gardener.team)
-            if (trees.isNotEmpty()) {
-                trees.sortBy { it.health }
-                val lowest = trees[0]
-                if (GameConstants.BULLET_TREE_MAX_HEALTH - lowest.health >= GameConstants.WATER_HEALTH_REGEN_RATE
-                        && gardener.water(lowest)) {
+            override fun onProcess() {
+                val trees = gardener.controller.senseNearbyTrees(2f, gardener.team)
+                if (trees.isNotEmpty()) {
+                    trees.sortBy { it.health }
+                    val lowest = trees[0]
+                    when {
+                        (gardener.areEnemiesNearby(1000f)
+                                && Utils.isTrue(0.2f / (1 + gardener.env.nearbyRobots(gardener.team, 49f).size))
+                                && gardener.buildUnit(RobotType.LUMBERJACK, Dir.Hex.random().dir)) -> {
+                        }
+                        (GameConstants.BULLET_TREE_MAX_HEALTH - lowest.health >= GameConstants.WATER_HEALTH_REGEN_RATE
+                                && gardener.water(lowest)) -> {
+                        }
+                        (gardener.controller.treeCount * 3 / gardener.controller.robotCount
+                                > Utils.random.nextFloat()
+                                && gardener.buildUnit(RobotType.SCOUT, Dir.Hex.random().dir)) -> {
+                        }
+                        (4.5f - trees.size / 10f > Utils.random.nextFloat()) -> {
+                            status = Status.FAILED
+                        }
+                    }
                 } else {
-                    //TODO figure out
-                    gardener.buildUnit(RobotType.SCOUT, Dir.Hex.random().dir)
+                    status = Status.FAILED
                 }
-            } else {
-                status = Status.FAILED
             }
-        }
 
-        override fun onTerminate() {}
+
+            override fun onTerminate() {}
+        }
     }
 }

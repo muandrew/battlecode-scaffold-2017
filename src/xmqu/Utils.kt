@@ -6,6 +6,9 @@ import java.util.*
 class Utils {
     companion object {
         val random = Random()
+        fun isTrue(fraction: Float): Boolean {
+            return fraction > random.nextFloat()
+        }
     }
 }
 
