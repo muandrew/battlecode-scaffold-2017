@@ -35,19 +35,17 @@ fun intercepts(a: MapLocation, b: MapLocation, center: MapLocation, radius: Floa
     val y1 = a.y
     val x2 = b.x
     val y2 = b.y
-    // since we are using circles
-    val radiusM = radius - 2
-    val minX = center.x - radiusM
-    val minY = center.y - radiusM
-    val maxX = center.x + radiusM
-    val maxY = center.y + radiusM
+    val minX = center.x - radius
+    val minY = center.y - radius
+    val maxX = center.x + radius
+    val maxY = center.y + radius
 
     // Completely outside.
     if ((x1 <= minX && x2 <= minX)
             || (y1 <= minY && y2 <= minY)
             || (x1 >= maxX && x2 >= maxX)
             || (y1 >= maxY && y2 >= maxY))
-        return false;
+        return false
 
     val m = (y2 - y1) / (x2 - x1)
 
