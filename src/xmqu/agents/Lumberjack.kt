@@ -5,7 +5,6 @@ import battlecode.common.RobotController
 import xmqu.Vector2D
 import xmqu.goals.CompositeGoal
 import xmqu.goals.Goal
-import xmqu.inverseRSq
 import xmqu.shuffle
 
 class Lumberjack(controller: RobotController) : Agent(controller) {
@@ -17,14 +16,14 @@ class Lumberjack(controller: RobotController) : Agent(controller) {
         val location = controller.location
         val heading = Vector2D(location, dest).normalize()
         for (bullet in env.bullets) {
-            heading.addWith(inverseRSq(bullet.location, location, 30f))
+            heading.addWith(Vector2D.inverseRSq(bullet.location, location, 30f))
         }
         for (robot in env.robots) {
             val mag = if (robot.team.isPlayer) 10f else 5f
-            heading.addWith(inverseRSq(robot.location, location, mag))
+            heading.addWith(Vector2D.inverseRSq(robot.location, location, mag))
         }
         for (tree in env.trees) {
-            heading.addWith(inverseRSq(tree.location, location, 6f))
+            heading.addWith(Vector2D.inverseRSq(tree.location, location, 6f))
         }
         val dir = heading.toDirection()
         return moveTo(dir) || moveRandomly() || moveRandomly()

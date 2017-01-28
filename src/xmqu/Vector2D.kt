@@ -5,6 +5,14 @@ import battlecode.common.MapLocation
 
 class Vector2D(var x: Float, var y: Float) {
 
+    companion object {
+        fun inverseRSq(start: MapLocation, end: MapLocation, weight: Float): Vector2D {
+            val result = Vector2D(start, end)
+            val rSq = result.magSquared()
+            return result.normalize().multiplyWith(weight / rSq)
+        }
+    }
+
     constructor(start: MapLocation, end: MapLocation)
             : this(end.x - start.x, end.y - start.y)
 
@@ -38,11 +46,4 @@ class Vector2D(var x: Float, var y: Float) {
     fun toDirection(): Direction {
         return Direction(x, y)
     }
-}
-
-fun inverseRSq(start: MapLocation, end: MapLocation, weight: Float): Vector2D {
-    val result = Vector2D(start, end)
-    val rSq = result.magSquared()
-    System.out.println(weight / rSq)
-    return result.normalize().multiplyWith(weight / rSq)
 }

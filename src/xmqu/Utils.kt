@@ -1,6 +1,9 @@
 package xmqu
 
 import battlecode.common.MapLocation
+import battlecode.common.RobotInfo
+import battlecode.common.RobotType
+import battlecode.common.Team
 import java.util.*
 
 class Utils {
@@ -26,6 +29,18 @@ fun <E> MutableList<E>.shuffle(): MutableList<E> {
         remaining--
     }
     return this
+}
+
+fun List<RobotInfo>.ofTeam(team: Team): List<RobotInfo> {
+    return this.filter { it.team == team }
+}
+
+fun List<RobotInfo>.ofType(type: RobotType): List<RobotInfo> {
+    return this.filter { it.type == type }
+}
+
+fun List<RobotInfo>.withinDistanceSq(location: MapLocation, distanceSq: Float): List<RobotInfo> {
+    return this.filter { it.location.distanceSquaredTo(location) < distanceSq }
 }
 
 /**
