@@ -35,6 +35,10 @@ fun List<RobotInfo>.ofTeam(team: Team): List<RobotInfo> {
     return this.filter { it.team == team }
 }
 
+fun List<RobotInfo>.notOfTeam(team: Team): List<RobotInfo> {
+    return this.filter { it.team != team }
+}
+
 fun List<RobotInfo>.ofType(type: RobotType): List<RobotInfo> {
     return this.filter { it.type == type }
 }

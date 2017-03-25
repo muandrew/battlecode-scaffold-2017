@@ -7,6 +7,7 @@ import battlecode.common.RobotType
 import xmqu.goals.CompositeGoal
 import xmqu.goals.Goal
 import xmqu.intercepts
+import xmqu.notOfTeam
 import xmqu.shuffle
 
 class Scout(controller: RobotController) : Agent(controller) {
@@ -17,7 +18,7 @@ class Scout(controller: RobotController) : Agent(controller) {
 
     class InitialGoal(val scout: Scout) : CompositeGoal(scout) {
 
-        val waypoints: MutableList<MapLocation> = scout.controller.getInitialArchonLocations(scout.team.opponent())
+        val waypoints: MutableList<MapLocation> = scout.controller.getInitialArchonLocations(scout.opponent)
                 .toMutableList()
                 .shuffle()
 
@@ -75,7 +76,7 @@ class Scout(controller: RobotController) : Agent(controller) {
                         .filter { intercepts(location, target, it.location, it.radius) }
                         .forEach { return false }
                 scout.env.robots
-                        .filter { it.team != scout.team.opponent() }
+                        .notOfTeam(scout.opponent)
                         .filter { intercepts(location, target, it.location, it.radius) }
                         .forEach { return false }
                 val dir = Direction(location, target)
