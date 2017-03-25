@@ -1,10 +1,12 @@
 package xmqu.agents
 
+import battlecode.common.GameConstants
 import battlecode.common.MapLocation
 import battlecode.common.RobotController
 import xmqu.Vector2D
 import xmqu.goals.CompositeGoal
 import xmqu.goals.Goal
+import xmqu.ofTeam
 import xmqu.shuffle
 
 class Lumberjack(controller: RobotController) : Agent(controller) {
@@ -19,11 +21,11 @@ class Lumberjack(controller: RobotController) : Agent(controller) {
             heading.addWith(Vector2D.inverseRSq(bullet.location, location, 30f))
         }
         for (robot in env.robots) {
-            val mag = if (robot.team.isPlayer) 10f else 5f
+            val mag = if (robot.team.isPlayer) 10f else -4f
             heading.addWith(Vector2D.inverseRSq(robot.location, location, mag))
         }
         for (tree in env.trees) {
-            heading.addWith(Vector2D.inverseRSq(tree.location, location, 6f))
+            heading.addWith(Vector2D.inverseRSq(tree.location, location, -4f))
         }
         val dir = heading.toDirection()
         return moveTo(dir) || moveRandomly() || moveRandomly()
@@ -33,9 +35,9 @@ class Lumberjack(controller: RobotController) : Agent(controller) {
         return InitialGoal(this)
     }
 
-    class InitialGoal(val scout: Lumberjack) : CompositeGoal(scout) {
+    class InitialGoal(val lumberjack: Lumberjack) : CompositeGoal(lumberjack) {
 
-        val waypoints: MutableList<MapLocation> = scout.controller.getInitialArchonLocations(scout.team.opponent())
+        val waypoints: MutableList<MapLocation> = lumberjack.controller.getInitialArchonLocations(lumberjack.team.opponent())
                 .toMutableList()
                 .shuffle()
 
@@ -47,19 +49,18 @@ class Lumberjack(controller: RobotController) : Agent(controller) {
                 }
                 moveToWaypoint() -> {
                 }
-                else -> scout.moveRandomly()
+                else -> lumberjack.moveRandomly()
             }
+            attack()
         }
 
         override fun onTerminate() {}
 
         fun moveToEnemy(): Boolean {
-            val enemies = scout.env.robots
-                    .filter { it.team == scout.team.opponent() }
+            val enemies = lumberjack.env.robots.ofTeam(lumberjack.opponent)
             if (enemies.isNotEmpty()) {
                 val target = enemies[0].location
-                scout.moveTowards(target)
-                fire(target)
+                lumberjack.moveTowards(target)
                 return true
             } else {
                 return false
@@ -69,7 +70,7 @@ class Lumberjack(controller: RobotController) : Agent(controller) {
         fun moveToWaypoint(): Boolean {
             clearWaypoints()
             if (waypoints.isNotEmpty()) {
-                scout.moveTowards(waypoints[0])
+                lumberjack.moveTowards(waypoints[0])
                 return true
             } else {
                 return false
@@ -78,19 +79,28 @@ class Lumberjack(controller: RobotController) : Agent(controller) {
 
         fun clearWaypoints() {
             if (waypoints.isNotEmpty()) {
-                if (waypoints[0].distanceSquaredTo(scout.controller.location) < 15) {
+                if (waypoints[0].distanceSquaredTo(lumberjack.controller.location) < 15) {
                     waypoints.removeAt(0)
                 }
             }
         }
 
-        fun fire(target: MapLocation): Boolean {
-            if (scout.controller.canChop(target)) {
-                scout.controller.chop(target)
+        fun attack(): Boolean {
+            val robots = lumberjack.controller.senseNearbyRobots(GameConstants.LUMBERJACK_STRIKE_RADIUS).asList()
+            val enemyRobots = robots.ofTeam(lumberjack.opponent)
+            if (enemyRobots.isNotEmpty() && lumberjack.controller.canStrike()) {
+                lumberjack.controller.strike()
                 return true
             } else {
-                return false
+                val trees = lumberjack.env.trees.filter { it.team != lumberjack.team }
+                if (trees.isNotEmpty()) {
+                    if (lumberjack.controller.canChop(trees[0].ID)) {
+                        lumberjack.controller.chop(trees[0].ID)
+                        return true
+                    }
+                }
             }
+            return false
         }
     }
 }

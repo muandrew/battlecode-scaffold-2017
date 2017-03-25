@@ -3,12 +3,11 @@ package xmqu.agents
 import battlecode.common.*
 import xmqu.Dir
 import xmqu.Utils
-import xmqu.goals.AtomicGoal
-import xmqu.goals.CompositeGoal
-import xmqu.goals.Goal
-import xmqu.goals.Status
+import xmqu.goals.*
+import xmqu.movements.RandomWalk
 
-class Gardener(controller: RobotController) : Agent(controller), ProductionUnit {
+class Gardener(controller: RobotController) : ProductionUnit(controller) {
+    val randomWalk = RandomWalk(3)
 
     fun canHexUp(): Boolean {
         Dir.Hex.values().forEach {
@@ -37,6 +36,7 @@ class Gardener(controller: RobotController) : Agent(controller), ProductionUnit 
         override fun onActivate() {
             addSubGoal(HexFortress(gardener))
             addSubGoal(FindSettlement(gardener))
+            addSubGoal(BuildLumberjack(gardener))
         }
 
         override fun onProcess() {
@@ -45,6 +45,8 @@ class Gardener(controller: RobotController) : Agent(controller), ProductionUnit 
 
         override fun onTerminate() {}
     }
+
+    class BuildLumberjack(gardener: Gardener) : BuildUnit(gardener, RobotType.LUMBERJACK, gardener.randomWalk)
 
     class FindSettlement(val gardener: Gardener) : AtomicGoal(gardener) {
         val ROAM_TIME = 10
@@ -160,7 +162,7 @@ class Gardener(controller: RobotController) : Agent(controller), ProductionUnit 
                         }
                         (gardener.controller.treeCount * 3 / gardener.controller.robotCount
                                 > Utils.random.nextFloat()
-                                && gardener.buildUnit(RobotType.SCOUT, Dir.Hex.random().dir)) -> {
+                                && gardener.buildUnit(RobotType.LUMBERJACK, Dir.Hex.random().dir)) -> {
                         }
                         (4.5f - trees.size / 10f > Utils.random.nextFloat()) -> {
                             status = Status.FAILED

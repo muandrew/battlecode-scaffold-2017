@@ -4,9 +4,7 @@ import battlecode.common.Direction
 import battlecode.common.RobotController
 import battlecode.common.RobotType
 
-interface ProductionUnit {
-
-    val controller: RobotController
+abstract class ProductionUnit(controller: RobotController) : Agent(controller) {
 
     fun buildUnit(type: RobotType, dir: Direction): Boolean {
         if (controller.canBuildRobot(type, dir)) {
