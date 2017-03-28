@@ -210,10 +210,10 @@ task jarForUpload(type: Jar) {
 
 // Battlecode updates a lot.
 // We should make sure to check for new dependencies frequently.
-configurations.all {
-    // Check for updates every build.
-    resolutionStrategy.cacheDynamicVersionsFor 60, 'seconds'
-}
+// configurations.all {
+//     // Check for updates every build.
+//     resolutionStrategy.cacheDynamicVersionsFor 60, 'seconds'
+// }
 
 
 // We need to download the battlecode plugin before we can run the build script; this does that.
@@ -235,8 +235,8 @@ buildscript {
         classpath group: 'org.battlecode', name: 'battlecode-gradle-plugin', version: versions.battlecode
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
     }
-    configurations.all {
-        // Check for updates every build.
-        resolutionStrategy.cacheDynamicVersionsFor 60, 'seconds'
-    }
+    // configurations.all {
+    //     // Check for updates every build.
+    //     resolutionStrategy.cacheDynamicVersionsFor 60, 'seconds'
+    // }
 }
