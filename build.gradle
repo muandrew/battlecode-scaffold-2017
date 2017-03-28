@@ -220,7 +220,7 @@ task jarForUpload(type: Jar) {
 buildscript {
     ext.versions = [
         battlecode: '2017.+',
-        kotlin: '1.0.6',
+        kotlin: '1.1.1',
         scala: '2.11.7'
     ]
 
